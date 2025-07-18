@@ -1,7 +1,8 @@
-import { memo, useState, useCallback, useMemo } from "react";
+import { memo, useState, useMemo } from "react";
 import { getImageUrl } from "../service/api";
 import { highlightText } from "../utils/highlightText";
 import { getIMDBUrl } from "../utils/imdb";
+import { StarFavoriteIcon } from "../ui/icons";
 import type { Movie } from "../types/movie";
 
 interface MovieItemProps {
@@ -30,36 +31,30 @@ const MovieItem = memo(
       return releaseDate ? new Date(releaseDate).getFullYear() : "";
     };
 
-    const getMovieGenres = useCallback(
-      (genreIds: readonly number[]) => {
-        return genreIds
-          .map((genreId) => {
-            const genre = genres.find((g) => g.id === genreId);
-            return genre ? genre.name : "";
-          })
-          .filter(Boolean)
-          .slice(0, 3)
-          .join(", ");
-      },
-      [genres]
-    );
+    const getMovieGenres = (genreIds: readonly number[]) => {
+      return genreIds
+        .map((genreId) => {
+          const genre = genres.find((g) => g.id === genreId);
+          return genre ? genre.name : "";
+        })
+        .filter(Boolean)
+        .slice(0, 3)
+        .join(", ");
+    };
 
-    const handleClick = useCallback(async () => {
+    const handleClick = async () => {
       try {
         const imdbUrl = await getIMDBUrl(movie);
         window.open(imdbUrl, "_blank", "noopener,noreferrer");
       } catch (error) {
         console.warn("Error opening IMDB:", error);
       }
-    }, [movie]);
+    };
 
-    const handleToggleFavorite = useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onToggleFavorite(movie);
-      },
-      [movie, onToggleFavorite]
-    );
+    const handleToggleFavorite = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onToggleFavorite(movie);
+    };
 
     const shouldShowFavoriteButton =
       showFavoriteButton || isSelected || isFavorite;
@@ -78,7 +73,7 @@ const MovieItem = memo(
           isFirstItem
             ? "flex items-start p-4 cursor-pointer transition-colors border-b border-gray-200"
             : "flex items-center p-3 cursor-pointer transition-colors"
-        } ${isSelected ? "bg-blue-50" : "hover:bg-gray-100"}`}
+        } ${isSelected ? "bg-blue-50" : "hover:bg-gray-100"} relative`}
       >
         <div
           className={`flex-shrink-0 mr-3 ${
@@ -116,18 +111,20 @@ const MovieItem = memo(
             )}
           </h3>
 
-          <div className="flex flex-wrap gap-1 mt-1">
-            {getMovieGenres(movie.genre_ids)
-              .split(", ")
-              .map((genre, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-1 text-xs font-bold bg-gray-100 text-gray-900 rounded-full"
-                >
-                  {genre}
-                </span>
-              ))}
-          </div>
+          {getMovieGenres(movie.genre_ids) && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {getMovieGenres(movie.genre_ids)
+                .split(", ")
+                .map((genre, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 text-xs font-bold bg-gray-100 text-gray-900 rounded-full"
+                  >
+                    {genre}
+                  </span>
+                ))}
+            </div>
+          )}
 
           {isFirstItem && (
             <div className="mt-3">
@@ -146,11 +143,11 @@ const MovieItem = memo(
         {shouldShowFavoriteButton && (
           <button
             onClick={handleToggleFavorite}
-            className={`flex-shrink-0 ml-3 p-2 rounded-full transition-all duration-200 ${
+            className={`p-2 rounded-full transition-all duration-200 ${
               isFavorite
                 ? "text-yellow-500 hover:text-yellow-600 scale-100"
                 : "text-gray-400 hover:text-yellow-500 scale-100"
-            }`}
+            } md:absolute md:top-2 md:right-2 md:z-10`}
             title={
               isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
             }
@@ -158,19 +155,7 @@ const MovieItem = memo(
               isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
             }
           >
-            <svg
-              className="w-5 h-5"
-              fill={isFavorite ? "currentColor" : "none"}
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-              />
-            </svg>
+            <StarFavoriteIcon isFilled={isFavorite} />
           </button>
         )}
       </div>

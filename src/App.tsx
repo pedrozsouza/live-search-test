@@ -1,3 +1,4 @@
+import { FavoritesTable } from "./components/FavoritesTable";
 import { MovieSearch } from "./components/MovieSearch";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           </p>
         </div>
         <MovieSearch />
+        <FavoritesTable />
       </div>
     </div>
   );

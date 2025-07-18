@@ -23,7 +23,7 @@ export function highlightText(
   return parts.map((part, index) => {
     const isMatch = normalizeText(part) === normalizedSearch;
     return isMatch ? (
-      <strong key={index} className="font-bold text-blue-400">
+      <strong key={index} className="font-bold" style={{ color: "#0092FF" }}>
         {part}
       </strong>
     ) : (

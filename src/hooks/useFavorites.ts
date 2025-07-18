@@ -12,7 +12,7 @@ export function useFavorites() {
       try {
         setFavorites(JSON.parse(savedFavorites));
       } catch (error) {
-        console.error("Erro ao carregar favoritos:", error);
+        console.error("Error loading favorites:", error);
       }
     }
 
@@ -22,7 +22,7 @@ export function useFavorites() {
         try {
           setFavorites(JSON.parse(updatedFavorites));
         } catch (error) {
-          console.error("Erro ao carregar favoritos atualizados:", error);
+          console.error("Error loading updated favorites:", error);
         }
       }
     };

@@ -4,6 +4,7 @@ import { useFavorites } from "../hooks/useFavorites";
 import { useDebounce } from "../hooks/useDebounce";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import MovieItem from "./MovieItem";
+import { LoadingSpinner, SearchIcon, LinkIcon } from "../ui/icons";
 import type { Movie } from "../types/movie";
 
 interface MovieSearchProps {
@@ -42,19 +43,15 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
     rootElement: dropdownRef.current,
   });
 
-  const showMovies = useMemo(() => movies.length > 0, [movies.length]);
-
-  const showErrorLinks = useMemo(
-    () => debouncedQuery.trim().length > 0 && !isLoading && totalResults === 0,
-    [debouncedQuery, isLoading, totalResults]
-  );
+  const showMovies = movies.length > 0;
+  const showErrorLinks =
+    debouncedQuery.trim().length > 0 && !isLoading && totalResults === 0;
 
   const shouldShowDropdown = useMemo(
     () => searchQuery.trim().length > 0 && (showMovies || showErrorLinks),
     [searchQuery, showMovies, showErrorLinks]
   );
 
-  
   const handleMovieSelect = useCallback(
     (movie: Movie) => {
       setSearchQuery(movie.title);
@@ -66,19 +63,19 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
     [onMovieSelect]
   );
 
-    const autoComplete = useCallback(() => {
-      if (movies.length > 0 && searchQuery.trim()) {
-        setOriginalQuery(searchQuery);
-        setSearchQuery(movies[0].title);
-      }
-    }, [movies, searchQuery]);
-  
-    const revertComplete = useCallback(() => {
-      if (originalQuery) {
-        setSearchQuery(originalQuery);
-        setOriginalQuery("");
-      }
-    }, [originalQuery]);
+  const autoComplete = useCallback(() => {
+    if (movies.length > 0 && searchQuery.trim()) {
+      setOriginalQuery(searchQuery);
+      setSearchQuery(movies[0].title);
+    }
+  }, [movies, searchQuery]);
+
+  const revertComplete = useCallback(() => {
+    if (originalQuery) {
+      setSearchQuery(originalQuery);
+      setOriginalQuery("");
+    }
+  }, [originalQuery]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -147,10 +144,20 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
           break;
       }
     },
-    [showMovies, movies, showErrorLinks, isOpen, autoComplete, revertComplete, selectedIndex, handleMovieSelect, debouncedQuery, toggleFavorite, genres]
+    [
+      showMovies,
+      movies,
+      showErrorLinks,
+      isOpen,
+      autoComplete,
+      revertComplete,
+      selectedIndex,
+      handleMovieSelect,
+      debouncedQuery,
+      toggleFavorite,
+      genres,
+    ]
   );
-
-  
 
   const handleToggleFavorite = useCallback(
     (movie: Movie) => {
@@ -236,7 +243,7 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
 
           {isLoading && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              <LoadingSpinner />
             </div>
           )}
         </div>
@@ -279,7 +286,7 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
 
           {isFetchingNextPage && (
             <div className="flex justify-center items-center p-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              <LoadingSpinner />
               <span className="ml-2 text-gray-500">
                 Carregando mais filmes...
               </span>
@@ -317,7 +324,10 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
                       : "text-blue-600 hover:bg-gray-50"
                   }`}
                 >
-                  🔗 Buscar '{debouncedQuery}' no IMDB
+                  <div className="flex items-center">
+                    <LinkIcon className="w-4 h-4 mr-2" />
+                    <span>Buscar '{debouncedQuery}' no IMDB</span>
+                  </div>
                 </a>
                 <a
                   ref={selectedIndex === 1 ? linkRef : null}
@@ -332,7 +342,10 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
                       : "text-blue-600 hover:bg-gray-50"
                   }`}
                 >
-                  🔍 Buscar '{debouncedQuery}' no Google
+                  <div className="flex items-center">
+                    <SearchIcon className="w-4 h-4 mr-2" />
+                    <span>Buscar '{debouncedQuery}' no Google</span>
+                  </div>
                 </a>
               </div>
             </div>
