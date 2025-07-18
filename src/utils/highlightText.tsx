@@ -1,33 +1,34 @@
 import React from "react";
 
-const normalizeText = (str: string) =>
-  str
+export const normalizeText = (str: string): string => {
+  return str
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+};
 
 export function highlightText(
   text: string,
   searchTerm: string
 ): React.ReactNode {
-  if (!searchTerm.trim()) {
-    return text;
-  }
+  if (!searchTerm.trim()) return text;
 
   const normalizedSearch = normalizeText(searchTerm);
-  const escapedSearch = normalizedSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(`(${escapedSearch})`, "gi");
+  const normalizedText = normalizeText(text);
+  const matchIndex = normalizedText.indexOf(normalizedSearch);
 
-  const parts = text.split(regex);
+  if (matchIndex === -1) return text;
 
-  return parts.map((part, index) => {
-    const isMatch = normalizeText(part) === normalizedSearch;
-    return isMatch ? (
-      <strong key={index} className="font-bold" style={{ color: "#0092FF" }}>
-        {part}
+  const start = text.slice(0, matchIndex).length;
+  const end = start + normalizedSearch.length;
+
+  return (
+    <>
+      {text.substring(0, start)}
+      <strong className="font-bold" style={{ color: "#0092FF" }}>
+        {text.substring(start, end)}
       </strong>
-    ) : (
-      part
-    );
-  });
+      {text.substring(end)}
+    </>
+  );
 }

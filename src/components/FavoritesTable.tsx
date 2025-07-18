@@ -66,7 +66,7 @@ const FavoritesTable = memo(() => {
           <div className="col-span-2">Imagem do pôster</div>
         </div>
 
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 max-h-150 overflow-y-auto">
           {favorites.map((movie) => (
             <div
               key={movie.id}
@@ -151,7 +151,7 @@ const FavoritesTable = memo(() => {
 
                 <button
                   onClick={(e) => handleRemoveFavorite(e, movie.id)}
-                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
                   title="Remover dos favoritos"
                   aria-label={`Remover ${movie.title || "filme"} dos favoritos`}
                 >

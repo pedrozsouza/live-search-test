@@ -16,12 +16,13 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
   const [originalQuery, setOriginalQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isAutoCompleteActive, setIsAutoCompleteActive] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectedItemRef = useRef<HTMLDivElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
-
+  
   const debouncedQuery = useDebounce(searchQuery, 300);
   const {
     movies,
@@ -34,7 +35,7 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
   } = useMovieSearch(debouncedQuery);
   const { genres, error: genresError } = useGenres();
   const { isFavorite, toggleFavorite } = useFavorites();
-
+  
   const infiniteScrollTriggerRef = useInfiniteScroll({
     hasNextPage,
     isFetchingNextPage,
@@ -42,12 +43,19 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
     isEnabled: movies.length > 0,
     rootElement: dropdownRef.current,
   });
-
+  
+  const formatMovieCount = (count: number): string => {
+    if (count === 1) {
+      return "1 filme encontrado";
+    }
+    return `${count} filmes encontrados`;
+  };
   const handleMovieSelect = (movie: Movie) => {
     setSearchQuery(movie.title);
     setOriginalQuery("");
     setIsOpen(false);
     setSelectedIndex(-1);
+    setIsAutoCompleteActive(false);
   };
   const showMovies = movies.length > 0;
   const showErrorLinks =
@@ -58,11 +66,11 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
     [searchQuery, showMovies, showErrorLinks]
   );
 
-
   const autoComplete = useCallback(() => {
     if (movies.length > 0 && searchQuery.trim()) {
         setOriginalQuery(searchQuery);
         setSearchQuery(movies[0].title);
+        setIsAutoCompleteActive(true);
       }
   }, [movies, searchQuery]);
 
@@ -70,6 +78,7 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
     if (originalQuery) {
       setSearchQuery(originalQuery);
       setOriginalQuery("");
+      setIsAutoCompleteActive(false);
     }
   }, [originalQuery]);
 
@@ -95,8 +104,10 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
           autoComplete();
           break;
         case "ArrowLeft":
-          e.preventDefault();
-          revertComplete();
+          if (isAutoCompleteActive) {
+            e.preventDefault();
+            revertComplete();
+          }
           break;
         case "Enter":
           if (isOpen) {
@@ -136,11 +147,12 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
             e.preventDefault();
             setIsOpen(false);
             setSelectedIndex(-1);
+            setIsAutoCompleteActive(false);
           }
           break;
       }
     },
-    [showMovies, movies, showErrorLinks, isOpen, autoComplete, revertComplete, selectedIndex, debouncedQuery, toggleFavorite, genres]
+    [showMovies, movies, showErrorLinks, isOpen, autoComplete, revertComplete, selectedIndex, debouncedQuery, toggleFavorite, genres, isAutoCompleteActive]
   );
 
   const handleToggleFavorite = useCallback(
@@ -165,6 +177,7 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
   useEffect(() => {
     setIsOpen(shouldShowDropdown);
     setSelectedIndex(-1);
+    setIsAutoCompleteActive(false);
   }, [shouldShowDropdown]);
 
   useEffect(() => {
@@ -176,6 +189,7 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
         !inputRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
+        setIsAutoCompleteActive(false);
       }
     };
 
@@ -283,7 +297,7 @@ const MovieSearch = memo(({ onError }: MovieSearchProps) => {
           {showMovies && !hasNextPage && movies.length > 0 && (
             <div className="text-center p-4 text-gray-500 text-sm">
               {totalResults > 0
-                ? `${movies.length} de ${totalResults} filmes encontrados`
+                ? `${movies.length} de ${formatMovieCount(totalResults)}`
                 : "Todos os resultados carregados"}
             </div>
           )}
