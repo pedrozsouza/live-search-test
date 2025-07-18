@@ -64,6 +64,8 @@ const MovieItem = memo(
       [movie.title, searchTerm]
     );
 
+    const fullTitle = `${movie.title} (${getMovieYear(movie.release_date)})`;
+
     return (
       <div
         onClick={handleClick}
@@ -97,18 +99,21 @@ const MovieItem = memo(
           )}
         </div>
 
-        <div className="flex-grow min-w-0">
+        <div className="flex-grow min-w-0 pr-8">
           <h3
             className={`font-medium text-gray-900 ${
-              isFirstItem ? "text-lg mb-2" : "truncate"
+              isFirstItem ? "text-lg mb-2" : "text-sm"
             }`}
+            title={fullTitle}
           >
-            {highlightedTitle}{" "}
-            {getMovieYear(movie.release_date) && (
-              <span className="text-gray-400 font-normal">
-                ({getMovieYear(movie.release_date)})
-              </span>
-            )}
+            <span className="truncate block">
+              {highlightedTitle}{" "}
+              {getMovieYear(movie.release_date) && (
+                <span className="text-gray-400 font-normal">
+                  ({getMovieYear(movie.release_date)})
+                </span>
+              )}
+            </span>
           </h3>
 
           {getMovieGenres(movie.genre_ids) && (
@@ -147,7 +152,7 @@ const MovieItem = memo(
               isFavorite
                 ? "text-yellow-500 hover:text-yellow-600 scale-100"
                 : "text-gray-400 hover:text-yellow-500 scale-100"
-            } md:absolute md:top-2 md:right-2 md:z-10`}
+            } absolute top-2 right-2 z-10`}
             title={
               isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
             }
