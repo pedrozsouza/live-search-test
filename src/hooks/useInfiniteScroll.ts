@@ -18,7 +18,6 @@ export function useInfiniteScroll({
   const triggerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Memoiza o callback para evitar recriações desnecessárias
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
@@ -30,7 +29,6 @@ export function useInfiniteScroll({
     [hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
-  // Cria o observer apenas uma vez
   useEffect(() => {
     if (!isEnabled) {
       return;
@@ -50,7 +48,6 @@ export function useInfiniteScroll({
     };
   }, [handleIntersection, isEnabled, rootElement]);
 
-  // Gerencia a observação do elemento trigger
   useEffect(() => {
     const observer = observerRef.current;
     const trigger = triggerRef.current;
