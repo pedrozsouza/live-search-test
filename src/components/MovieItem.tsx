@@ -123,7 +123,7 @@ const MovieItem = memo(
                 .map((genre, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-1 text-xs font-bold bg-gray-100 text-gray-900 rounded-full"
+                    className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-900 rounded-full"
                   >
                     {genre}
                   </span>

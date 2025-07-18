@@ -22,7 +22,10 @@ Depois, configure as variáveis de ambiente:
 
 ```bash
 # Copie o arquivo de exemplo
-cp .env.example .env
+.env.example
+
+# Crie o arquivo original e cole o conteudo copiado de .env.example
+.env 
 
 # Edite o arquivo .env e adicione suas credenciais
 VITE_TMDB_API_BASE_URL=https://api.themoviedb.org/3
