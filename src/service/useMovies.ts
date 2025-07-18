@@ -76,8 +76,10 @@ export function useGenres() {
     gcTime: 1000 * 60 * 60 * 2,
   });
 
+  const genres = useMemo(() => data || [], [data]);
+
   return {
-    genres: data || [],
+    genres,
     isLoading,
     error: error?.message,
   };

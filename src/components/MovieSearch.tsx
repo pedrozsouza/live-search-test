@@ -8,10 +8,10 @@ import { LoadingSpinner, SearchIcon, LinkIcon } from "../ui/icons";
 import type { Movie } from "../types/movie";
 
 interface MovieSearchProps {
-  onMovieSelect?: (movie: Movie) => void;
+  onError?: (error: string | null) => void;
 }
 
-const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
+const MovieSearch = memo(({ onError }: MovieSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [originalQuery, setOriginalQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +32,7 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
     isLoading,
     error,
   } = useMovieSearch(debouncedQuery);
-  const { genres } = useGenres();
+  const { genres, error: genresError } = useGenres();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const infiniteScrollTriggerRef = useInfiniteScroll({
@@ -43,6 +43,12 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
     rootElement: dropdownRef.current,
   });
 
+  const handleMovieSelect = (movie: Movie) => {
+    setSearchQuery(movie.title);
+    setOriginalQuery("");
+    setIsOpen(false);
+    setSelectedIndex(-1);
+  };
   const showMovies = movies.length > 0;
   const showErrorLinks =
     debouncedQuery.trim().length > 0 && !isLoading && totalResults === 0;
@@ -52,22 +58,12 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
     [searchQuery, showMovies, showErrorLinks]
   );
 
-  const handleMovieSelect = useCallback(
-    (movie: Movie) => {
-      setSearchQuery(movie.title);
-      setOriginalQuery("");
-      setIsOpen(false);
-      setSelectedIndex(-1);
-      onMovieSelect?.(movie);
-    },
-    [onMovieSelect]
-  );
 
   const autoComplete = useCallback(() => {
     if (movies.length > 0 && searchQuery.trim()) {
-      setOriginalQuery(searchQuery);
-      setSearchQuery(movies[0].title);
-    }
+        setOriginalQuery(searchQuery);
+        setSearchQuery(movies[0].title);
+      }
   }, [movies, searchQuery]);
 
   const revertComplete = useCallback(() => {
@@ -144,19 +140,7 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
           break;
       }
     },
-    [
-      showMovies,
-      movies,
-      showErrorLinks,
-      isOpen,
-      autoComplete,
-      revertComplete,
-      selectedIndex,
-      handleMovieSelect,
-      debouncedQuery,
-      toggleFavorite,
-      genres,
-    ]
+    [showMovies, movies, showErrorLinks, isOpen, autoComplete, revertComplete, selectedIndex, debouncedQuery, toggleFavorite, genres]
   );
 
   const handleToggleFavorite = useCallback(
@@ -215,6 +199,11 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
     }
   }, [selectedIndex, showMovies, showErrorLinks]);
 
+  useEffect(() => {
+    const currentError = error || genresError;
+    onError?.(currentError || null);
+  }, [error, genresError, onError]);
+
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="mb-4">
@@ -253,12 +242,6 @@ const MovieSearch = memo(({ onMovieSelect }: MovieSearchProps) => {
         Utilize as teclas ↓ ↑ para navegar • → para autocompletar • ← para
         reverter • Espaço para favoritar
       </p>
-
-      {error && (
-        <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
 
       {isOpen && (
         <div

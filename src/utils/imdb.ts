@@ -1,9 +1,13 @@
-import type { Movie } from "../types/movie";
-import { api } from "../service/api";
+
+import { api } from "../service/api"; 
 
 const imdbCache = new Map<number, string>();
 
-export const getIMDBUrl = async (movie: Movie): Promise<string> => {
+export const getIMDBUrl = async (movie: {
+  id: number;
+  title: string;
+  release_date: string;
+}): Promise<string> => {
   const cachedUrl = imdbCache.get(movie.id);
   if (cachedUrl) {
     return cachedUrl;

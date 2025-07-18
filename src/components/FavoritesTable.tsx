@@ -1,17 +1,36 @@
 import { memo, useCallback } from "react";
 import { useFavorites } from "../hooks/useFavorites";
 import { getImageUrl } from "../service/api";
+import { getIMDBUrl } from "../utils/imdb";
 import { StarIcon, TrashIcon } from "../ui/icons";
+import type { FavoriteMovie } from "../types/movie";
 
 const FavoritesTable = memo(() => {
   const { favorites, removeFromFavorites } = useFavorites();
 
   const handleRemoveFavorite = useCallback(
-    (movieId: number) => {
+    (e: React.MouseEvent, movieId: number) => {
+      e.stopPropagation();
+      e.preventDefault();
       removeFromFavorites(movieId);
     },
     [removeFromFavorites]
   );
+
+  const handleMovieClick = useCallback(async (movie: FavoriteMovie) => {
+    try {
+      const movieForIMDB = {
+        id: movie.id,
+        title: movie.title,
+        release_date: movie.year ? `${movie.year}-01-01` : "",
+      };
+
+      const imdbUrl = await getIMDBUrl(movieForIMDB);
+      window.open(imdbUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.warn("Error opening IMDB:", error);
+    }
+  }, []);
 
   if (favorites.length === 0) {
     return (
@@ -51,9 +70,9 @@ const FavoritesTable = memo(() => {
           {favorites.map((movie) => (
             <div
               key={movie.id}
-              className="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-0 p-6 hover:bg-gray-50 transition-colors relative"
+              onClick={() => handleMovieClick(movie)}
+              className="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-0 p-6 hover:bg-gray-50 transition-colors relative cursor-pointer"
             >
-              
               <div className="md:hidden absolute top-4 right-4">
                 <div className="flex-shrink-0 w-16 h-20">
                   {movie.poster_path ? (
@@ -65,9 +84,7 @@ const FavoritesTable = memo(() => {
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">
-                        Sem imagem
-                      </span>
+                      <span className="text-gray-400 text-xs">Sem imagem</span>
                     </div>
                   )}
                 </div>
@@ -133,7 +150,7 @@ const FavoritesTable = memo(() => {
                 </div>
 
                 <button
-                  onClick={() => handleRemoveFavorite(movie.id)}
+                  onClick={(e) => handleRemoveFavorite(e, movie.id)}
                   className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
                   title="Remover dos favoritos"
                   aria-label={`Remover ${movie.title || "filme"} dos favoritos`}
